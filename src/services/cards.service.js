@@ -3,32 +3,38 @@ import http from "../http-common";
 
 //Might need to handle path for commenting differently
 
-class CardsDataService {
-  getAll() {
+  const getAll = () => {
     return http.get("/cards");
-  }
+  };
 
-  login(userName, data) {
+  const login = (userName, data) => {
     return http.post(`/login/${userName}`, data);
-  }
+  };
 
   //TODO:Handle other search params
-  findByName(cardName) {
+  const findByName = (cardName) => {
     return http.get(`/cards?cardName=${cardName}`);
-  }
+  };
 
-  create(comment) {
+  const create = (comment) => {
     return http.put(`/cards/:cardName/${comment}`);
-  }
+  };
 
-  update(sessionKey, comment) {
+  const update = (sessionKey, comment) => {
     return http.put(`/cards/:cardName/${comment}`, sessionKey);
-  }
+  };
 
-  delete(sessionKey, comment) {
+  const remove = (sessionKey, comment) => {
     return http.delete(`/cards/:cardName/${comment}`, sessionKey);
-  }
+  };
 
-}
 
-export default new CardsDataService();
+
+export default {
+  getAll,
+  login,
+  findByName,
+  create,
+  update,
+  remove
+};

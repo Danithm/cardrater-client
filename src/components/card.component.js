@@ -1,173 +1,146 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import CardsDataService from "../services/cards.service";
 
 //Also need to add rating system along-side comment
 //Need to add comment display for other comments and ratings
 //Change author section to pull from currently logged in user
 //Need image api for card art
-export default class Card extends Component {
-  constructor(props) {
-    super(props);
-    this.onChangeAuthor = this.onChangeAuthor.bind(this);
-    this.onChangeComment = this.onChangeComment.bind(this);
-    this.getCard = this.getCard.bind(this);
-    this.updateComment = this.updateComment.bind(this);
-    this.deleteComment = this.deleteComment.bind(this);
+//Remove author option, auth check for current user or force login
+const Card = props => {
+  const initialCardState = {
+    id: null,
+    author: "",
+    comment: "",
+    published: false
+  };
+  const [comment, setComment] = useState(initialCardState);
+  const [currentCard, setCurrentCard] = useState(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [message, setMessage] = useState("");
 
-    this.state = {
-      currentCard: {
-        cardName: null,
-        author: "",
-        comment: ""
-      },
-      message: ""
-    };
-  }
-
-  componentDidMount() {
-    this.getCard(this.props.match.params.cardName);
-  }
-
-  onChangeAuthor(e) {
-    const author = e.target.value;
-
-    this.setState(function(prevState) {
-      return {
-        currentCard: {
-          ...prevState.currentCard,
-          author: author
-        }
-      };
-    });
-  }
-
-  onChangeComment(e) {
-    const comment = e.target.value;
-    
-    this.setState(prevState => ({
-      currentCard: {
-        ...prevState.currentCard,
-        comment: comment
-      }
-    }));
-  }
-
-  getCard(cardName) {
-    CardsDataService.get(cardName)
+  const getCard = id => {
+    CardsDataService.get(id)
       .then(response => {
-        this.setState({
-          currentCard: response.data
-        });
+        setCurrentCard(response.data);
         console.log(response.data);
       })
       .catch(e => {
         console.log(e);
       });
-  }
+  };
 
-  updateComment(status) {
+  useEffect(() => {
+    getCard(props.match.params.id);
+  }, [props.match.params.id]);
+
+  const handleInputChange = event => {
+    const { name, value } = event.target;
+    setComment({ ...comment, [name]:value});
+  };
+
+  const saveComment = () => {
     var data = {
-      cardName: this.state.currentCard.cardName,
-      author: this.state.currentCard.author,
-      comment: this.state.currentCard.comment,
-      published: status
+      author: comment.author,
+      comment: comment.comment
     };
 
-    CardsDataService.update(this.state.currentCard.comment, data)
+    CardsDataService.create(data)
       .then(response => {
-        this.setState(prevState => ({
-          currentCard: {
-            ...prevState.currentCard,
-            published: status
-          }
-        }));
+        setComment({
+          author: response.data.author,
+          comment: response.data.comment,
+          published: response.data.published
+        });
+        setSubmitted(true);
         console.log(response.data);
       })
       .catch(e => {
         console.log(e);
       });
-  }
-//Need to adjust this to delete the comment and not the card
-  deleteComment() {    
-    CardsDataService.delete(this.state.currentCard.comment)
+  };
+
+  const newComment = () => {
+    setComment(initialCardState);
+    setSubmitted(false);
+  };
+
+  const updateComment = () => {
+    CardsDataService.update(currentCard.id, comment)
       .then(response => {
         console.log(response.data);
-        this.props.history.push('/cards/:cardName/')
+        setMessage("The comment was updated successfully!");
       })
       .catch(e => {
         console.log(e);
       });
-  }
+  };
 
-  render() {
-    const { currentCard } = this.state;
-
+  const deleteComment = () => {
+    CardsDataService.remove(comment)
+      .then(response => {
+        console.log(response.data);
+        props.history.push("/cards");
+      })
+      .catch(e => {
+        console.log(e);
+      });
+  };
+//Need to adjust this to display card data above comment area
     return (
-      <div>
-        {currentCard ? (
-          <div className="edit-form">
-            <h4>Card</h4>
-            <form>
-              <div className="form-group">
-                <label htmlFor="author">Author</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="author"
-                  value={currentCard.author}
-                  onChange={this.onChangeAuthor}
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="comment">Comment</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="comment"
-                  value={currentCard.comment}
-                  onChange={this.onChangeComment}
-                />
-              </div>
+      <div className="submit-form">
+      {submitted ? (
+        <div>
+          <h4>You commented successfully!</h4>
+          <button className="btn btn-success" onClick={newComment}>
+            Add
+          </button>
+          <button className="badge badge-danger mr-2" onClick={deleteComment}>
+            Delete
+          </button>
 
-              <div className="form-group">
-                <label>
-                  <strong>Status:</strong>
-                </label>
-                {currentCard.published ? "Published" : "Pending"}
-              </div>
-            </form>
-
-            {currentCard.published ? (
-              <button
-                className="badge badge-primary mr-2"
-                onClick={() => this.updateComment(false)}
-              >
-                UnPublish
-              </button>
-            ) : (
-              <button
-                className="badge badge-primary mr-2"
-                onClick={() => this.updateComment(true)}
-              >
-                Publish
-              </button>
-            )}
-
-            <button
-              className="badge badge-danger mr-2"
-              onClick={this.deleteComment}
-            >
-              Delete
-            </button>
-            <p>{this.state.message}</p>
+          <button
+            type="submit"
+            className="badge badge-success"
+            onClick={updateComment}
+          >
+            Update
+          </button>
+          <p>{message}</p>
+        </div>
+      ) : (
+        <div>
+          <div className="form-group">
+            <label htmlFor="author">Author</label>
+            <input
+              type="text"
+              className="form-control"
+              id="author"
+              required
+              value={comment.author}
+              onChange={handleInputChange}
+              name="author"
+            />
           </div>
-        ) : (
-          <div>
-            <br />
-            <p>Please click on a Card...</p>
+
+          <div className="form-group">
+            <label htmlFor="comment">Comment</label>
+            <input
+              type="text"
+              className="form-control"
+              id="comment"
+              required
+              value={comment.comment}
+              onChange={handleInputChange}
+              name="comment"
+            />
           </div>
-        )}
-      </div>
+
+          <button onClick={saveComment} className="btn btn-success">
+            Submit
+          </button>
+        </div>
+      )}
+    </div>
     );
-  }
-}
+  };
+export default Card;

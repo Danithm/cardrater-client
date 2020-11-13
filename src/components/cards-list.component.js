@@ -1,155 +1,129 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import CardDataService from "../services/cards.service";
 import { Link } from "react-router-dom";
 
 //Need to expand search options, best if collapsable
 //Probably similar style to gatherer
-export default class CardsList extends Component {
-  constructor(props) {
-    super(props);
-    this.onChangeSearchCardName = this.onChangeSearchCardName.bind(this);
-    this.retrieveCards = this.retrieveCards.bind(this);
-    this.refreshList = this.refreshList.bind(this);
-    this.setActiveCard = this.setActiveCard.bind(this);
-    this.searchCardName = this.searchCardName.bind(this);
+const CardsList = () => {
+  const [cards, setCards] = useState([]);
+  const [currentCard, setCurrentCard] = useState(null);
+  const [currentIndex, setCurrentIndex] = useState(-1);
+  const [searchCardName, setSearchCardName] = useState("");
 
-    this.state = {
-      cards: [],
-      currentCard: null,
-      currentIndex: -1,
-      searchCardName: ""
-    };
-  }
+  useEffect(() => {
+    retrieveCards();
+  }, []);
 
-  componentDidMount() {
-    this.retrieveCards();
-  }
-
-  onChangeSearchCardName(e) {
+  const onChangeSearchCardName = e => {
     const searchCardName = e.target.value;
+    setSearchCardName(searchCardName);
+  };
 
-    this.setState({
-      searchCardName: searchCardName
-    });
-  }
-
-  retrieveCards() {
+  const retrieveCards = () => {
     CardDataService.getAll()
       .then(response => {
-        this.setState({
-          cards: response.data
-        });
+        setCards(response.data);
         console.log(response.data);
       })
       .catch(e => {
         console.log(e);
       });
-  }
+  };
 
-  refreshList() {
-    this.retrieveCards();
-    this.setState({
-      currentCard: null,
-      currentIndex: -1
-    });
-  }
+  const refreshList = () => {
+    retrieveCards();
+    setCurrentCard(null);
+    setCurrentIndex(-1);
+  };
 
-  setActiveCard(card, index) {
-    this.setState({
-      currentCard: card,
-      currentIndex: index
-    });
-  }
+  const setActiveCard = (card, index) => {
+    setCurrentCard(card);
+    setCurrentIndex(index);
+  };
 
-  searchCardName() {
-    CardDataService.findByCardName(this.state.searchCardName)
+  const findByName = () => {
+    CardDataService.findByName(searchCardName)
       .then(response => {
-        this.setState({
-          cards: response.data
-        });
+        setCards(response.data);
         console.log(response.data);
       })
       .catch(e => {
         console.log(e);
       });
-  }
-
-  render() {
-    const { searchCardName, cards, currentCard, currentIndex } = this.state;
-
+  };
     return (
       <div className="list row">
-        <div className="col-md-8">
-          <div className="input-group mb-3">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Search by card name"
-              value={searchCardName}
-              onChange={this.onChangeSearchCardName}
-            />
-            <div className="input-group-append">
-              <button
-                className="btn btn-outline-secondary"
-                type="button"
-                onClick={this.searchCardName}
-              >
-                Search
-              </button>
-            </div>
+      <div className="col-md-8">
+        <div className="input-group mb-3">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Search by name"
+            value={searchCardName}
+            onChange={onChangeSearchCardName}
+          />
+          <div className="input-group-append">
+            <button
+              className="btn btn-outline-secondary"
+              type="button"
+              onClick={findByName}
+            >
+              Search
+            </button>
           </div>
         </div>
-        <div className="col-md-6">
-          <h4>Cards List</h4>
-
-          <ul className="list-group">
-            {cards &&
-              cards.map((card, index) => (
-                <li
-                  className={
-                    "list-group-item " +
-                    (index === currentIndex ? "active" : "")
-                  }
-                  onClick={() => this.setActiveCard(card, index)}
-                  key={index}
-                >
-                  {card.cardName}
-                </li>
-              ))}
-          </ul>
-        </div>
-        <div className="col-md-6">
-          {currentCard ? (
-            <div>
-              <h4>Card</h4>
-              <div>
-                <label>
-                  <strong>Name:</strong>
-                </label>{" "}
-                {currentCard.cardName}
-              </div>
-              <div>
-                <label>
-                  <strong>Text:</strong>
-                </label>{" "}
-                {currentCard.text}
-              </div>
-
-              <Link
-                to={"/cards/" + currentCard.cardName}
-                className="badge badge-warning"
-              >
-                Comment
-              </Link>
-            </div>
-          ) : (
-            <div>
-              <br />
-              <p>Please click on a Card...</p>
-            </div>
-          )}
-        </div>
       </div>
+      <div className="col-md-6">
+        <h4>Cards List</h4>
+
+        <ul className="list-group">
+          {cards &&
+            cards.map((card, index) => (
+              <li
+                className={
+                  "list-group-item " + (index === currentIndex ? "active" : "")
+                }
+                onClick={() => setActiveCard(card, index)}
+                key={index}
+              >
+                {card.name}
+              </li>
+            ))}
+        </ul>
+
+      </div>
+      <div className="col-md-6">
+        {currentCard ? (
+          <div>
+            <h4>Card</h4>
+            <div>
+              <label>
+                <strong>Name:</strong>
+              </label>{" "}
+              {currentCard.name}
+            </div>
+            <div>
+              <label>
+                <strong>Description:</strong>
+              </label>{" "}
+              {currentCard.description}
+            </div>
+
+            <Link
+              to={"/cards/" + currentCard.id}
+              className="badge badge-warning"
+            >
+              Comment
+            </Link>
+          </div>
+        ) : (
+          <div>
+            <br />
+            <p>Please click on a Card...</p>
+          </div>
+        )}
+      </div>
+    </div>
     );
-  }
-}
+  };
+export default CardsList;
