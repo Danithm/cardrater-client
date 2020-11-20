@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
 import CardsDataService from "../services/cards.service";
+import AuthService from "../services/auth.service";
 
-//Also need to add rating system along-side comment
+
 //Need to add comment display for other comments and ratings
 //Change author section to pull from currently logged in user
 //Need image api for card art
-//Remove author option, auth check for current user or force login
+//auth check for current user or force login
 const Card = props => {
   const initialCardState = {
-    id: null,
-    author: "",
-    comment: "",
+    cardID: null,
+    username: "",
+    text: "",
+    rating: "",
     published: false
   };
   const [comment, setComment] = useState(initialCardState);
@@ -18,8 +20,8 @@ const Card = props => {
   const [submitted, setSubmitted] = useState(false);
   const [message, setMessage] = useState("");
 
-  const getCard = id => {
-    CardsDataService.get(id)
+  const getCard = cardID => {
+    CardsDataService.get(cardID)
       .then(response => {
         setCurrentCard(response.data);
         console.log(response.data);
@@ -30,8 +32,8 @@ const Card = props => {
   };
 
   useEffect(() => {
-    getCard(props.match.params.id);
-  }, [props.match.params.id]);
+    getCard(props.match.params.cardID);
+  }, [props.match.params.cardID]);
 
   const handleInputChange = event => {
     const { name, value } = event.target;
@@ -40,15 +42,17 @@ const Card = props => {
 
   const saveComment = () => {
     var data = {
-      author: comment.author,
-      comment: comment.comment
+      username: comment.username,
+      text: comment.text,
+      rating: comment.rating
     };
 
     CardsDataService.create(data)
       .then(response => {
         setComment({
-          author: response.data.author,
-          comment: response.data.comment,
+          username: response.data.username,
+          text: response.data.text,
+          rating: response.data.rating,
           published: response.data.published
         });
         setSubmitted(true);
@@ -65,7 +69,7 @@ const Card = props => {
   };
 
   const updateComment = () => {
-    CardsDataService.update(currentCard.id, comment)
+    CardsDataService.update(currentCard.cardID, comment)
       .then(response => {
         console.log(response.data);
         setMessage("The comment was updated successfully!");
@@ -86,6 +90,7 @@ const Card = props => {
       });
   };
 //Need to adjust this to display card data above comment area
+//https://gatherer.wizards.com/Handlers/Image.ashx?type=card&multiverseid=${card.identifiers.multiverseId}
     return (
       <div className="submit-form">
       {submitted ? (
@@ -114,11 +119,11 @@ const Card = props => {
             <input
               type="text"
               className="form-control"
-              id="author"
+              id="username"
               required
-              value={comment.author}
+              value={comment.username}
               onChange={handleInputChange}
-              name="author"
+              name="username"
             />
           </div>
 
@@ -127,11 +132,11 @@ const Card = props => {
             <input
               type="text"
               className="form-control"
-              id="comment"
+              id="text"
               required
-              value={comment.comment}
+              value={comment.text}
               onChange={handleInputChange}
-              name="comment"
+              name="text"
             />
           </div>
 

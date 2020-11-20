@@ -78,15 +78,15 @@ const CardsList = () => {
 
         <ul className="list-group">
           {cards &&
-            cards.map((card, index) => (
+            cards.map((cards, index) => (
               <li
                 className={
                   "list-group-item " + (index === currentIndex ? "active" : "")
                 }
-                onClick={() => setActiveCard(card, index)}
+                onClick={() => setActiveCard(cards, index)}
                 key={index}
               >
-                {card.name}
+                {cards.cardName}
               </li>
             ))}
         </ul>
@@ -100,17 +100,17 @@ const CardsList = () => {
               <label>
                 <strong>Name:</strong>
               </label>{" "}
-              {currentCard.name}
+              {currentCard.cardName}
             </div>
             <div>
               <label>
                 <strong>Description:</strong>
               </label>{" "}
-              {currentCard.description}
+              {currentCard.cardText}
             </div>
 
             <Link
-              to={"/cards/" + currentCard.id}
+              to={"/cards/" + currentCard.cardID}
               className="badge badge-warning"
             >
               Comment

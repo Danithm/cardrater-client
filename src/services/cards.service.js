@@ -7,32 +7,25 @@ import http from "../http-common";
     return http.get("/cards");
   };
 
-  const login = (userName, data) => {
-    return http.post(`/login/${userName}`, data);
-  };
-
   //TODO:Handle other search params
   const findByName = (cardName) => {
     return http.get(`/cards?cardName=${cardName}`);
   };
 
   const create = (comment) => {
-    return http.put(`/cards/:cardName/${comment}`);
+    return http.put(`/cards/:cardID/${comment}`);
   };
 
-  const update = (sessionKey, comment) => {
-    return http.put(`/cards/:cardName/${comment}`, sessionKey);
+  const update = (comment) => {
+    return http.put(`/cards/:cardID/${comment}`);
   };
 
-  const remove = (sessionKey, comment) => {
-    return http.delete(`/cards/:cardName/${comment}`, sessionKey);
+  const remove = (comment) => {
+    return http.delete(`/cards/:cardID/${comment}`);
   };
-
-
 
 export default {
   getAll,
-  login,
   findByName,
   create,
   update,

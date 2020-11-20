@@ -80,7 +80,7 @@ const App = () => {
             <Route exact path="/login" component={Login} />
             <Route exact path="/register" component={Register} />
             <Route exact path="/profile" component={Profile} />
-            <Route path="/cards/:cardName" component={Cards} />
+            <Route path="/cards/:cardID" component={Cards} />
           </Switch>
         </div>
       </div>
