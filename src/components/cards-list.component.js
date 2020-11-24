@@ -14,11 +14,6 @@ const CardsList = () => {
     retrieveCards();
   }, []);
 
-  const onChangeSearchCardName = e => {
-    const searchCardName = e.target.value;
-    setSearchCardName(searchCardName);
-  };
-
   const retrieveCards = () => {
     CardDataService.getAll()
       .then(response => {
@@ -30,10 +25,9 @@ const CardsList = () => {
       });
   };
 
-  const refreshList = () => {
-    retrieveCards();
-    setCurrentCard(null);
-    setCurrentIndex(-1);
+  const onChangeSearchCardName = e => {
+    const searchCardName = e.target.value;
+    setSearchCardName(searchCardName);
   };
 
   const setActiveCard = (card, index) => {
@@ -75,18 +69,17 @@ const CardsList = () => {
       </div>
       <div className="col-md-6">
         <h4>Cards List</h4>
-
         <ul className="list-group">
           {cards &&
-            cards.map((cards, index) => (
+            cards.map((card, index) => (
               <li
                 className={
                   "list-group-item " + (index === currentIndex ? "active" : "")
                 }
-                onClick={() => setActiveCard(cards, index)}
+                onClick={() => setActiveCard(card, index)}
                 key={index}
               >
-                {cards.cardName}
+                {card.cardName}
               </li>
             ))}
         </ul>
