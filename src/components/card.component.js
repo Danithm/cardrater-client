@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import CardsDataService from "../services/cards.service";
 
-//Need to add comment display for other comments and ratings
+//TODO: Model currentComment from card-list to select
+//Hide if user != username
 //Change author section to pull from currently logged in user
-//Need image api for card art
 //auth check for current user or force login
 const Card = props => {
   const initialCommentState = {
@@ -13,8 +13,8 @@ const Card = props => {
     rating: "",
     published: false
   };
-  //Might need to reshape data
   //Currently going for minimalism
+  //"minimalism" - as this card component devoles into spaghet
   const initialCardState = {
     cardID: null,
     cardName: "",
@@ -26,12 +26,15 @@ const Card = props => {
   const [currentCard, setCurrentCard] = useState(initialCardState);
   const [submitted, setSubmitted] = useState(false);
   const [message, setMessage] = useState("");
+  const [imgSrc, setImgSrc] = useState("");
 
   const getCard = cardID => {
     CardsDataService.getByID(cardID)
       .then(response => {
-        setCurrentCard(response.data);
-        console.log(response.data);
+        //Needed to extract to object
+        //Instead of response.data
+        const card = response.data[0];
+        setCurrentCard(card);
       })
       .catch(e => {
         console.log(e);
@@ -42,9 +45,8 @@ const Card = props => {
     getCard(props.match.params.cardID);
   }, [props.match.params.cardID]);
 
-  //Needs data service function
-  const retrieveComments = () => {
-    CardsDataService.getComments(currentCard.cardID)
+  const retrieveComments = cardID => {
+    CardsDataService.getComments(cardID)
       .then(response => {
         setAllComments(response.data);
         console.log(response.data);
@@ -53,10 +55,19 @@ const Card = props => {
         console.log(e);
       });
   };
-  
+
   useEffect(() => {
-    retrieveComments();
-  }, []);
+    retrieveComments(props.match.params.cardID);
+  }, [props.match.params.cardID]);
+
+  const getImgUrl = () => {
+    const multiIDUrl = "https://gatherer.wizards.com/Handlers/Image.ashx?type=card&multiverseid=" + currentCard.multiverseId;
+    setImgSrc(multiIDUrl);
+  };
+
+  useEffect(() => {
+    getImgUrl();
+  });
 
   const handleInputChange = event => {
     const { name, value } = event.target;
@@ -81,6 +92,8 @@ const Card = props => {
         });
         setSubmitted(true);
         console.log(response.data);
+        //Clear input here
+        //Maybe it's own function
       })
       .catch(e => {
         console.log(e);
@@ -121,41 +134,26 @@ const Card = props => {
       {currentCard ? (
         <div>
         <h4>Card</h4>
-        <div>
-          <label>
-            <strong>Name:</strong>
-          </label>{" "}
-          {currentCard.cardName}
+        <img src = {imgSrc} />
+        <div className="cardName">
+          Name: {currentCard.cardName}
         </div>
-        <div>
-          <label>
-            <strong>Description:</strong>
-          </label>{" "}
-          {currentCard.cardText}
+        <div className="cardText">
+          Text: {currentCard.cardText}
         </div>
+
         {submitted ? (
         <div>
           <h4>You commented successfully!</h4>
           <button className="btn btn-success" onClick={newComment}>
-            Add
-          </button>
-          <button className="badge badge-danger mr-2" onClick={deleteComment}>
-            Delete
-          </button>
-
-          <button
-            type="submit"
-            className="badge badge-success"
-            onClick={updateComment}
-          >
-            Update
+            New Comment
           </button>
           <p>{message}</p>
         </div>
-      ) : (
-        <div>
+        ) : (
+        <div className="comment-form">
           <div className="form-group">
-            <label htmlFor="author">Username</label>
+            <label htmlFor="username">Username:</label>
             <input
               type="text"
               className="form-control"
@@ -168,7 +166,22 @@ const Card = props => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="comment">Comment</label>
+            <label htmlFor="rating">Rating(0 - 5):</label>
+            <input
+              type="range"
+              min="0"
+              max="5"
+              className="form-control"
+              id="rating"
+              required
+              value={comment.rating}
+              onChange={handleInputChange}
+              name="rating"
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="comment">Comment:</label>
             <input
               type="text"
               className="form-control"
@@ -188,9 +201,20 @@ const Card = props => {
 
       <ul className="list-group">
         {allComments.map((comment) => (
-            <li key={comment.id}> 
-            <label htmlFor="username">Username: </label>{comment.username}
-            <label htmlFor="displaycomment">Comment: </label>{comment.text}
+            <li className="comment-box" key={comment.id}> 
+            <label htmlFor="username">Username: {comment.username}</label>
+            <label htmlFor="displayrating">Rating: {comment.rating}</label>
+            <label htmlFor="displaycomment">Comment: {comment.text}</label>
+            <button className="btn btn-danger mr-2" onClick={deleteComment}>
+              Delete
+            </button>
+            <button
+              type="submit"
+              className="btn btn-success"
+              onClick={updateComment}
+            >
+              Update
+            </button>
             </li>
           ))}
       </ul>

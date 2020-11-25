@@ -9,6 +9,7 @@ const CardsList = () => {
   const [currentCard, setCurrentCard] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [searchCardName, setSearchCardName] = useState("");
+  const [imgSrc, setImgSrc] = useState("");
 
   useEffect(() => {
     retrieveCards();
@@ -33,6 +34,7 @@ const CardsList = () => {
   const setActiveCard = (card, index) => {
     setCurrentCard(card);
     setCurrentIndex(index);
+    setImgSrc("https://gatherer.wizards.com/Handlers/Image.ashx?type=card&multiverseid=" + card.multiverseId)
   };
 
   const findByName = () => {
@@ -87,8 +89,9 @@ const CardsList = () => {
       </div>
       <div className="col-md-6">
         {currentCard ? (
-          <div>
+          <div className="card-box">
             <h4>Card</h4>
+            <img src = {imgSrc} />
             <div>
               <label>
                 <strong>Name:</strong>
@@ -104,7 +107,7 @@ const CardsList = () => {
 
             <Link
               to={"/cards/" + currentCard.cardID}
-              className="badge badge-warning"
+              className="btn btn-warning"
             >
               Comment
             </Link>

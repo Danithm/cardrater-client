@@ -81,6 +81,7 @@ const App = () => {
             <Route exact path="/register" component={Register} />
             <Route exact path="/profile" component={Profile} />
             <Route path="/cards/:cardID" component={Cards} />
+            <Route path="/cards/:cardID/comments" component={Cards} />
           </Switch>
         </div>
       </div>

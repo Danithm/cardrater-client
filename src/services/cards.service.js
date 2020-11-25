@@ -7,8 +7,8 @@ import http from "../http-common";
     return http.get("/cards");
   };
 
-  const getComments = (cardID) => {
-    return http.get(`/cards/${cardID}`);
+  const getComments = cardID => {
+    return http.get(`/cards/${cardID}/comments`);
   };
 
   //TODO:Handle other search params
@@ -20,16 +20,16 @@ import http from "../http-common";
     return http.get(`/cards/${cardID}`);
   };
 
-  const create = (comment) => {
-    return http.put(`/cards/:cardID/${comment}`);
+  const create = comment => {
+    return http.post("/cards/:cardID", comment);
   };
 
   const update = (comment) => {
-    return http.put(`/cards/:cardID/${comment}`);
+    return http.put(`/cards/:cardID/comments/${comment}`);
   };
 
   const remove = (comment) => {
-    return http.delete(`/cards/:cardID/${comment}`);
+    return http.delete(`/cards/:cardID/comments/${comment}`);
   };
 
 export default {
