@@ -1,4 +1,6 @@
 import axios from "axios";
+import http from "../http-common";
+import authHeader from "./auth-header";
 
 const API_URL = "http://localhost:8080/api/auth/";
 
@@ -33,9 +35,14 @@ const getCurrentUser = () => {
   return JSON.parse(localStorage.getItem("user"));
 };
 
+const getCommentsByUser = (username) => {
+  return http.get("/profile", { headers: authHeader(), params: {username}});
+};
+
 export default {
   register,
   login,
   logout,
   getCurrentUser,
+  getCommentsByUser,
 };

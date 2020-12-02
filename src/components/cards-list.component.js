@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CardDataService from "../services/cards.service";
+import Pagination from "@material-ui/lab/Pagination";
 import { Link } from "react-router-dom";
 
 //Need to expand search options, best if collapsable
@@ -11,24 +12,57 @@ const CardsList = () => {
   const [searchCardName, setSearchCardName] = useState("");
   const [imgSrc, setImgSrc] = useState("");
 
-  useEffect(() => {
-    retrieveCards();
-  }, []);
+  const [page, setPage] = useState(1);
+  const [count, setCount] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+
+  const pageSizes = [10, 15, 20];
 
   const retrieveCards = () => {
-    CardDataService.getAll()
+    const params = getRequestParams(searchCardName, page, pageSize);
+    CardDataService.getAll(params)
       .then(response => {
-        setCards(response.data);
-        console.log(response.data);
+        const { cards, totalPages } = response.data;
+        setCards(cards);
+        setCount(totalPages);
       })
       .catch(e => {
         console.log(e);
       });
   };
 
+  useEffect(retrieveCards, [page, pageSize]);
+
   const onChangeSearchCardName = e => {
     const searchCardName = e.target.value;
     setSearchCardName(searchCardName);
+  };
+
+  const getRequestParams = (searchCardName, page, pageSize) => {
+    let params = {};
+
+    if (searchCardName) {
+      params["cardName"] = searchCardName;
+    }
+
+    if (page) {
+      params["page"] = page - 1;
+    }
+
+    if (pageSize) {
+      params["size"] = pageSize;
+    }
+
+    return params;
+  };
+
+  const handlePageChange = (event, value) => {
+    setPage(value);
+  };
+
+  const handlePageSizeChange = (event) => {
+    setPageSize(event.target.value);
+    setPage(1);
   };
 
   const setActiveCard = (card, index) => {
@@ -37,16 +71,6 @@ const CardsList = () => {
     setImgSrc("https://gatherer.wizards.com/Handlers/Image.ashx?type=card&multiverseid=" + card.multiverseId)
   };
 
-  const findByName = () => {
-    CardDataService.findByName(searchCardName)
-      .then(response => {
-        setCards(response.data);
-        console.log(response.data);
-      })
-      .catch(e => {
-        console.log(e);
-      });
-  };
     return (
       <div className="list row">
       <div className="col-md-8">
@@ -62,7 +86,7 @@ const CardsList = () => {
             <button
               className="btn btn-outline-secondary"
               type="button"
-              onClick={findByName}
+              onClick={retrieveCards}
             >
               Search
             </button>
@@ -71,6 +95,29 @@ const CardsList = () => {
       </div>
       <div className="col-md-6">
         <h4>Cards List</h4>
+
+        <div className="mt-3">
+          {"Items per Page: "}
+          <select onChange={handlePageSizeChange} value={pageSize}>
+            {pageSizes.map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
+
+          <Pagination
+            className="my-3"
+            count={count}
+            page={page}
+            siblingCount={1}
+            boundaryCount={1}
+            variant="outlined"
+            shape="rounded"
+            onChange={handlePageChange}
+          />
+        </div>
+
         <ul className="list-group">
           {cards &&
             cards.map((card, index) => (

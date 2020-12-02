@@ -3,17 +3,13 @@ import http from "../http-common";
 
 //Might need to handle path for commenting differently
 //Params is to shape paging data
-  const getAll = () => {
-    return http.get("/cards");
+//getAll handles name string search, or returns all if string null
+  const getAll = (params) => {
+    return http.get("/cards", {params});
   };
 
   const getComments = cardID => {
     return http.get(`/cards/${cardID}/comments`);
-  };
-
-  //TODO:Handle other search params
-  const findByName = (cardName) => {
-    return http.get(`/cards?cardName=${cardName}`);
   };
 
   const getByID = (cardID) => {
@@ -24,19 +20,18 @@ import http from "../http-common";
     return http.post("/cards/:cardID", comment);
   };
 
-  const update = (comment) => {
-    return http.put(`/cards/:cardID/comments/${comment}`);
+  const update = (commentID, comment) => {
+    return http.put(`/cards/:cardID/comments/${commentID}`, comment);
   };
 
-  const remove = (comment) => {
-    return http.delete(`/cards/:cardID/comments/${comment}`);
+  const remove = commentID => {
+    return http.delete(`/cards/:cardID/comments/${commentID}`);
   };
 
 export default {
   getAll,
   getComments,
   getByID,
-  findByName,
   create,
   update,
   remove

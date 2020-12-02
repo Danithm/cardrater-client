@@ -1,8 +1,24 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import AuthService from "../services/auth.service";
 
 const Profile = () => {
-  const currentUser = AuthService.getCurrentUser();
+  const currentUser = AuthService.getCurrentUser()
+  const [allComments, setAllComments] = useState([]);
+
+  const retrieveComments = username => {
+    AuthService.getCommentsByUser(username)
+      .then(response => {
+        setAllComments(response.data);
+        console.log(response.data);
+      })
+      .catch(e => {
+        console.log(e);
+      });
+  };
+
+  useEffect(() => {
+    retrieveComments(currentUser.username);
+  }, []);
 
   return (
     <div className="container">
@@ -22,9 +38,14 @@ const Profile = () => {
         <strong>Email:</strong> {currentUser.email}
       </p>
       <strong>Comments:</strong>
-      <ul>
-        {currentUser.comments &&
-          currentUser.comments.map((comment, index) => <li key={index}>{comment}</li>)}
+      <ul className="list-group">
+        {allComments.map((comment) => (
+            <li className="comment-box" key={comment.id}> 
+            <label htmlFor="username">Username: {comment.username}</label>
+            <label htmlFor="displayrating">Rating: {comment.rating}</label>
+            <label htmlFor="displaycomment">Comment: {comment.text}</label>
+            </li>
+          ))}
       </ul>
     </div>
   );

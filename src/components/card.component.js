@@ -22,6 +22,7 @@ const Card = props => {
     multiverseId: ""
   };
   const [comment, setComment] = useState(initialCommentState);
+  const [currentIndex, setCurrentIndex] = useState(-1);
   const [allComments, setAllComments] = useState([]);
   const [currentCard, setCurrentCard] = useState(initialCardState);
   const [submitted, setSubmitted] = useState(false);
@@ -103,11 +104,18 @@ const Card = props => {
   const newComment = () => {
     setComment(initialCommentState);
     setSubmitted(false);
+    window.location.reload(false);
   };
 //Might need to adjust comment changes
 //to send currentComment.id
+
+  const setActiveComment = (comment) => {
+    setComment(comment);
+    setCurrentIndex(comment.id);
+  };
+
   const updateComment = () => {
-    CardsDataService.update(comment)
+    CardsDataService.update(comment.id, comment)
       .then(response => {
         console.log(response.data);
         setMessage("The comment was updated successfully!");
@@ -118,17 +126,17 @@ const Card = props => {
   };
 
   const deleteComment = () => {
-    CardsDataService.remove(comment)
+    CardsDataService.remove(comment.id)
       .then(response => {
         console.log(response.data);
-        props.history.push("/cards");
+        //props.history.push("/cards/" + currentCard.cardID);
+        window.location.reload(false);
       })
       .catch(e => {
         console.log(e);
       });
   };
-//Need to adjust this to display card data above comment area
-//https://gatherer.wizards.com/Handlers/Image.ashx?type=card&multiverseid=${card.identifiers.multiverseId}
+
     return (
       <div>
       {currentCard ? (
@@ -195,17 +203,7 @@ const Card = props => {
           <button onClick={saveComment} className="btn btn-success">
             Submit
           </button>
-        </div>
-      )}
-      <h4>Comments</h4>
-
-      <ul className="list-group">
-        {allComments.map((comment) => (
-            <li className="comment-box" key={comment.id}> 
-            <label htmlFor="username">Username: {comment.username}</label>
-            <label htmlFor="displayrating">Rating: {comment.rating}</label>
-            <label htmlFor="displaycomment">Comment: {comment.text}</label>
-            <button className="btn btn-danger mr-2" onClick={deleteComment}>
+          <button className="btn btn-danger mr-2" onClick={deleteComment}>
               Delete
             </button>
             <button
@@ -215,6 +213,18 @@ const Card = props => {
             >
               Update
             </button>
+        </div>
+      )}
+      <h4>Comments</h4>
+
+      <ul className="list-group">
+        {allComments.map((comment) => (
+            <li className={"comment-box" + (comment.id === currentIndex ? "active" : "")} 
+            onClick={() => setActiveComment(comment)}
+              key={comment.id}> 
+            <label htmlFor="username">Username: {comment.username}</label>
+            <label htmlFor="displayrating">Rating: {comment.rating}</label>
+            <label htmlFor="displaycomment">Comment: {comment.text}</label>
             </li>
           ))}
       </ul>
