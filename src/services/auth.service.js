@@ -35,6 +35,7 @@ const getCurrentUser = () => {
   return JSON.parse(localStorage.getItem("user"));
 };
 
+//Not implemented
 const getCommentsByUser = (username) => {
   return http.get("/profile", { headers: authHeader(), params: {username}});
 };

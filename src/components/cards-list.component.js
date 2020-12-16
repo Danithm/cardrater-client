@@ -3,8 +3,7 @@ import CardDataService from "../services/cards.service";
 import Pagination from "@material-ui/lab/Pagination";
 import { Link } from "react-router-dom";
 
-//Need to expand search options, best if collapsable
-//Probably similar style to gatherer
+//Main card list page
 const CardsList = () => {
   const [cards, setCards] = useState([]);
   const [currentCard, setCurrentCard] = useState(null);

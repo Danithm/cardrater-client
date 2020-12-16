@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import CardsDataService from "../services/cards.service";
 
-//TODO: Model currentComment from card-list to select
-//Hide if user != username
+//TODO - Not implemented in final:
+//Hide update option if user != username
 //Change author section to pull from currently logged in user
 //auth check for current user or force login
+//Pull comments out as own component to improve readability
 const Card = props => {
   const initialCommentState = {
     cardID: null,
@@ -93,8 +94,6 @@ const Card = props => {
         });
         setSubmitted(true);
         console.log(response.data);
-        //Clear input here
-        //Maybe it's own function
       })
       .catch(e => {
         console.log(e);
@@ -106,8 +105,6 @@ const Card = props => {
     setSubmitted(false);
     window.location.reload(false);
   };
-//Might need to adjust comment changes
-//to send currentComment.id
 
   const setActiveComment = (comment) => {
     setComment(comment);
@@ -119,6 +116,7 @@ const Card = props => {
       .then(response => {
         console.log(response.data);
         setMessage("The comment was updated successfully!");
+        window.location.reload(false);
       })
       .catch(e => {
         console.log(e);
@@ -129,7 +127,6 @@ const Card = props => {
     CardsDataService.remove(comment.id)
       .then(response => {
         console.log(response.data);
-        //props.history.push("/cards/" + currentCard.cardID);
         window.location.reload(false);
       })
       .catch(e => {

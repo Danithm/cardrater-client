@@ -38,11 +38,7 @@ const App = () => {
                 All Cards
               </Link>
             </li>
-            <li className="nav-item">
-              <Link to={"/highestrated"} className="nav-link">
-                Highest Rated - Not implemented
-              </Link>
-            </li>
+            
             {currentUser ? (
           <div className="navbar-nav ml-auto">
             <li className="nav-item">
